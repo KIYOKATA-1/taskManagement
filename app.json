@@ -12,8 +12,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "platforms": ["ios", "android", "web"],
-    "ios": { "supportsTablet": true },
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/splash.png",
@@ -21,11 +27,20 @@
       },
       "edgeToEdgeEnabled": true
     },
-    "web": { "favicon": "./assets/images/favicon.png" },
-    "plugins": ["expo-router"],         
-    "experiments": { "typedRoutes": true },
+    "web": {
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
     "extra": {
-      "eas": { "projectId": "06bef5e2-b7a2-4d96-a792-8af5e7241ae8" }
-    }
+      "eas": {
+        "projectId": "06bef5e2-b7a2-4d96-a792-8af5e7241ae8"
+      }
+    },
+    "owner": "kiyokata"
   }
 }
