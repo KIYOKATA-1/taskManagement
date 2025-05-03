@@ -1,4 +1,4 @@
-import { HomeStyle } from '@/sytles/HomeStyle';
+import { HomeStyle } from '@/styles/HomeStyle';
 import React from 'react';
 import { SafeAreaView, StyleSheet, Text } from 'react-native';
 
