@@ -1,3 +1,4 @@
+// components/NewTaskModal.tsx
 import React, { useState } from 'react';
 import {
   Modal,
@@ -6,7 +7,6 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
-  Button,
   Platform,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -34,22 +34,19 @@ export default function NewTaskModal({
   const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
   const [showPicker, setShowPicker] = useState(false);
 
-  const onChange = (_event: any, selectedDate?: Date) => {
-    setShowPicker(false);
-    if (selectedDate) {
-      setDatetime((prev) => {
+  const onChange = (_e: any, selected?: Date) => {
+    if (Platform.OS === 'android') setShowPicker(false);
+    if (selected) {
+      setDatetime(prev => {
         const next = new Date(prev);
         if (pickerMode === 'date') {
           next.setFullYear(
-            selectedDate.getFullYear(),
-            selectedDate.getMonth(),
-            selectedDate.getDate()
+            selected.getFullYear(),
+            selected.getMonth(),
+            selected.getDate()
           );
         } else {
-          next.setHours(
-            selectedDate.getHours(),
-            selectedDate.getMinutes()
-          );
+          next.setHours(selected.getHours(), selected.getMinutes());
         }
         return next;
       });
@@ -125,7 +122,16 @@ export default function NewTaskModal({
             </TouchableOpacity>
           </View>
 
-          {showPicker && (
+          {showPicker && Platform.OS === 'android' && (
+            <DateTimePicker
+              value={datetime}
+              mode={pickerMode}
+              display="default"
+              onChange={onChange}
+            />
+          )}
+
+          {showPicker && Platform.OS === 'ios' && (
             <Modal
               transparent
               animationType="fade"
@@ -136,21 +142,27 @@ export default function NewTaskModal({
                   <DateTimePicker
                     value={datetime}
                     mode={pickerMode}
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    display="spinner"
                     onChange={onChange}
                     style={styles.inlinePicker}
                   />
-                  <View style={styles.inlineButtonRow}>
-                    <Button
-                      title="Отменить"
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      style={[styles.btn, styles.secondaryBtn]}
                       onPress={() => setShowPicker(false)}
-                      color="#aaa"
-                    />
-                    <Button
-                      title="ОК"
+                    >
+                      <Text style={[styles.btnText, styles.secondaryText]}>
+                        Отменить
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.btn, styles.primaryBtn]}
                       onPress={() => setShowPicker(false)}
-                      color="#2979FF"
-                    />
+                    >
+                      <Text style={[styles.btnText, styles.primaryText]}>
+                        ОК
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
               </View>
@@ -164,9 +176,23 @@ export default function NewTaskModal({
             onChangeText={setAddress}
           />
 
-          <View style={styles.buttonRow}>
-            <Button title="Отмена" color="#aaa" onPress={onClose} />
-            <Button title="Добавить" onPress={handleSubmit} color="#2979FF" />
+          <View style={styles.actionRow}>
+            <TouchableOpacity
+              style={[styles.btn, styles.secondaryBtn]}
+              onPress={onClose}
+            >
+              <Text style={[styles.btnText, styles.secondaryText]}>
+                Отмена
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.btn, styles.primaryBtn]}
+              onPress={handleSubmit}
+            >
+              <Text style={[styles.btnText, styles.primaryText]}>
+                Добавить
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -197,7 +223,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     marginBottom: GAP,
-    color: '#1DE9B6',
+    color: '#000',
     textAlign: 'center',
   },
   input: {
@@ -241,15 +267,32 @@ const styles = StyleSheet.create({
   inlinePicker: {
     width: 260,
   },
-  inlineButtonRow: {
+  actionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
     marginTop: GAP,
   },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: GAP,
+  btn: {
+    flex: 1,
+    paddingVertical: GAP / 1.5,
+    borderRadius: RADIUS / 2,
+    alignItems: 'center',
+    marginHorizontal: 4,
+  },
+  primaryBtn: {
+    backgroundColor: '#2979FF',
+  },
+  secondaryBtn: {
+    backgroundColor: '#E0E0E0',
+  },
+  btnText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  primaryText: {
+    color: '#fff',
+  },
+  secondaryText: {
+    color: '#333',
   },
 });

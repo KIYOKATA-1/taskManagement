@@ -7,6 +7,7 @@ export const HomeStyle = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F4F6FA',
+    paddingVertical: 30,
   },
 
   // Основной контент внутри SafeAreaView
