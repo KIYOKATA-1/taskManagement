@@ -7,9 +7,9 @@ import {
   TextInput,
   StyleSheet,
   Button,
-  Alert,
+  Platform,
 } from 'react-native';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 type NewTaskModalProps = {
   visible: boolean;
@@ -22,45 +22,62 @@ type NewTaskModalProps = {
   }) => void;
 };
 
-export default function NewTaskModal({ visible, onClose, onAdd }: NewTaskModalProps) {
+export default function NewTaskModal({
+  visible,
+  onClose,
+  onAdd,
+}: NewTaskModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [address, setAddress] = useState('');
   const [datetime, setDatetime] = useState(new Date());
-  const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
+  const [showPicker, setShowPicker] = useState(false);
 
-  const showPicker = (mode: 'date' | 'time') => {
-    setPickerMode(mode);
-    setPickerVisible(true);
-  };
-
-  const handleConfirm = (selected: Date) => {
-    setPickerVisible(false);
-    setDatetime(prev => {
-      const next = new Date(prev);
-      if (pickerMode === 'date') {
-        next.setFullYear(selected.getFullYear(), selected.getMonth(), selected.getDate());
-      } else {
-        next.setHours(selected.getHours(), selected.getMinutes());
-      }
-      return next;
-    });
+  const onChange = (_event: any, selectedDate?: Date) => {
+    setShowPicker(false);
+    if (selectedDate) {
+      setDatetime((prev) => {
+        const next = new Date(prev);
+        if (pickerMode === 'date') {
+          next.setFullYear(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth(),
+            selectedDate.getDate()
+          );
+        } else {
+          next.setHours(
+            selectedDate.getHours(),
+            selectedDate.getMinutes()
+          );
+        }
+        return next;
+      });
+    }
   };
 
   const handleSubmit = () => {
-    if (!name.trim()) {
-      Alert.alert('Ошибка', 'Название задачи не должно быть пустым');
-      return;
-    }
-    onAdd({ name: name.trim(), description: description.trim(), datetime, address: address.trim() });
-    // сброс полей
-    setName(''); setDescription(''); setAddress(''); setDatetime(new Date());
+    if (!name.trim()) return;
+    onAdd({
+      name: name.trim(),
+      description: description.trim(),
+      datetime,
+      address: address.trim(),
+    });
+    setName('');
+    setDescription('');
+    setAddress('');
+    setDatetime(new Date());
     onClose();
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
+    >
       <View style={styles.overlay}>
         <View style={styles.container}>
           <Text style={styles.title}>Новая полевая задача</Text>
@@ -81,23 +98,64 @@ export default function NewTaskModal({ visible, onClose, onAdd }: NewTaskModalPr
           />
 
           <View style={styles.row}>
-            <TouchableOpacity style={styles.pickerButton} onPress={() => showPicker('date')}>
-              <Text style={styles.pickerText}>{datetime.toLocaleDateString()}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.pickerButton} onPress={() => showPicker('time')}>
+            <TouchableOpacity
+              style={styles.pickerButton}
+              onPress={() => {
+                setPickerMode('date');
+                setShowPicker(true);
+              }}
+            >
               <Text style={styles.pickerText}>
-                {datetime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {datetime.toLocaleDateString()}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.pickerButton}
+              onPress={() => {
+                setPickerMode('time');
+                setShowPicker(true);
+              }}
+            >
+              <Text style={styles.pickerText}>
+                {datetime.toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </Text>
             </TouchableOpacity>
           </View>
 
-          <DateTimePickerModal
-            isVisible={pickerVisible}
-            mode={pickerMode}
-            date={datetime}
-            onConfirm={handleConfirm}
-            onCancel={() => setPickerVisible(false)}
-          />
+          {showPicker && (
+            <Modal
+              transparent
+              animationType="fade"
+              onRequestClose={() => setShowPicker(false)}
+            >
+              <View style={styles.overlay}>
+                <View style={styles.inlinePickerContainer}>
+                  <DateTimePicker
+                    value={datetime}
+                    mode={pickerMode}
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={onChange}
+                    style={styles.inlinePicker}
+                  />
+                  <View style={styles.inlineButtonRow}>
+                    <Button
+                      title="Отменить"
+                      onPress={() => setShowPicker(false)}
+                      color="#aaa"
+                    />
+                    <Button
+                      title="ОК"
+                      onPress={() => setShowPicker(false)}
+                      color="#2979FF"
+                    />
+                  </View>
+                </View>
+              </View>
+            </Modal>
+          )}
 
           <TextInput
             style={styles.input}
@@ -124,9 +182,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
+    alignItems: 'center',
     padding: GAP,
   },
   container: {
+    width: '100%',
+    maxWidth: 400,
     backgroundColor: '#fff',
     borderRadius: RADIUS,
     padding: GAP,
@@ -171,8 +232,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
+  inlinePickerContainer: {
+    backgroundColor: '#fff',
+    borderRadius: RADIUS,
+    padding: GAP,
+    alignItems: 'center',
+  },
+  inlinePicker: {
+    width: 260,
+  },
+  inlineButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: GAP,
+  },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: GAP,
   },
 });
