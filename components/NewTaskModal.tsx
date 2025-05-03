@@ -1,4 +1,3 @@
-// components/NewTaskModal.tsx
 import React, { useState } from 'react';
 import {
   Modal,
