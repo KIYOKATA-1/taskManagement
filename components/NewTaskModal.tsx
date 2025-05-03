@@ -7,6 +7,7 @@ import {
   TextInput,
   StyleSheet,
   Button,
+  Alert,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
@@ -48,11 +49,13 @@ export default function NewTaskModal({ visible, onClose, onAdd }: NewTaskModalPr
   };
 
   const handleSubmit = () => {
-    onAdd({ name, description, datetime, address });
-    setName('');
-    setDescription('');
-    setAddress('');
-    setDatetime(new Date());
+    if (!name.trim()) {
+      Alert.alert('Ошибка', 'Название задачи не должно быть пустым');
+      return;
+    }
+    onAdd({ name: name.trim(), description: description.trim(), datetime, address: address.trim() });
+    // сброс полей
+    setName(''); setDescription(''); setAddress(''); setDatetime(new Date());
     onClose();
   };
 
@@ -64,7 +67,7 @@ export default function NewTaskModal({ visible, onClose, onAdd }: NewTaskModalPr
 
           <TextInput
             style={styles.input}
-            placeholder="Название задачи"
+            placeholder="Название задачи*"
             value={name}
             onChangeText={setName}
           />
